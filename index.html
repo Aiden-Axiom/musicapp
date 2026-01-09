@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Music</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0e0e0e;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .player {
+            width: 320px;
+            background: #151515;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .artist {
+            font-size: 14px;
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #1db954;
+            border-radius: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            color: #1db954;
+        }
+
+        .playlist {
+            margin-top: 20px;
+        }
+
+        .song {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .song:hover {
+            background: #222;
+        }
+
+        .song.active {
+            background: #1db954;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+<div class="player">
+    <div class="title" id="title">Song Title</div>
+    <div class="artist" id="artist">Artist</div>
+
+    <div class="progress" id="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="controls">
+        <button onclick="prevSong()">⏮</button>
+        <button onclick="togglePlay()">▶️</button>
+        <button onclick="nextSong()">⏭</button>
+    </div>
+
+    <div class="playlist" id="playlist"></div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+    const songs = [
+        { title: "NOKIA", artist: "Drake", src: "music/nokia.mp3" },
+        { title: "Flower", artist: "Moby", src: "music/flower.mp3" },
+        { title: "I Write Sins Not Tragedies", artist: "Panic! At The Disco", src: "music/iwsnt.mp3" },
+        { title: "Send the Pain Below", artist: "Chevelle", src: "music/pain_below.mp3" },
+        { title: "Denial", artist: "Sevendust", src: "music/denial.mp3" },
+        { title: "Superstar (feat. Matthew Santos)", artist: "Lupe Fiasco", src: "music/superstar.mp3" },
+        { title: "Welcome to the Fold", artist: "Filter", src: "music/fold.mp3" },
+    ];
+
+    let currentSong = 0;
+    let isPlaying = false;
+
+    const audio = document.getElementById("audio");
+    const title = document.getElementById("title");
+    const artist = document.getElementById("artist");
+    const progress = document.getElementById("progress");
+    const progressBar = document.getElementById("progressBar");
+    const playlist = document.getElementById("playlist");
+
+    function loadSong(index) {
+        const song = songs[index];
+        title.textContent = song.title;
+        artist.textContent = song.artist;
+        audio.src = song.src;
+        updatePlaylist();
+    }
+
+    function togglePlay() {
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
+        }
+        isPlaying = !isPlaying;
+    }
+
+    function nextSong() {
+        currentSong = (currentSong + 1) % songs.length;
+        loadSong(currentSong);
+        audio.play();
+        isPlaying = true;
+    }
+
+    function prevSong() {
+        currentSong = (currentSong - 1 + songs.length) % songs.length;
+        loadSong(currentSong);
+        audio.play();
+        isPlaying = true;
+    }
+
+    audio.addEventListener("timeupdate", () => {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = percent + "%";
+    });
+
+    progress.addEventListener("click", e => {
+        const width = progress.clientWidth;
+        const clickX = e.offsetX;
+        audio.currentTime = (clickX / width) * audio.duration;
+    });
+
+    function updatePlaylist() {
+        playlist.innerHTML = "";
+        songs.forEach((song, index) => {
+            const div = document.createElement("div");
+            div.className = "song" + (index === currentSong ? " active" : "");
+            div.textContent = song.title + " - " + song.artist;
+            div.onclick = () => {
+                currentSong = index;
+                loadSong(index);
+                audio.play();
+                isPlaying = true;
+            };
+            playlist.appendChild(div);
+        });
+    }
+
+    loadSong(currentSong);
+</script>
+
+</body>
+</html>
